@@ -1,19 +1,9 @@
-import logging
+import logging, re
 from datetime import datetime
 
 import discord
 
-from modules import tags, imagesearch, metar, imagefun, help, save, cleverbot, games
-
-with open("keys.txt", "r") as file:  # file format: google key, owner ID, avwx key, bot client key on separate lines
-    lines = file.read().splitlines()
-    googleKey = lines[0]
-    ownerID = int(lines[1])
-    avwxKey = lines[2]
-    clientKey = lines[3]
-
-imagesearch.init(googleKey)
-logging.basicConfig(level=logging.INFO)
+from modules import tags, imagesearch, metar, imagefun, help, save, games, shuckman
 
 defaultPrefix = ';'
 
@@ -202,6 +192,13 @@ async def on_message(message):
         elif content.lower().startswith(("shuck")):
             await imagefun.shuckle_imagemaker(message)
 
+        elif content.lower().startswith(("hirtsifier")):
+            hirt = re.sub('b|m|n|\,|\.|\<|\>', '', content)
+            await message.channel.send(hirt[10:])
+
+        elif content.lower().startswith("_shuckman"):
+            await shuckman.shuckMan(message)
+
     elif message.clean_content.lower() == "b" or message.clean_content.lower() == "n":
         await imagesearch.advance(message)
 
@@ -217,6 +214,7 @@ async def on_message(message):
     elif message.clean_content.startswith("@" + message.guild.get_member(client.user.id).display_name):
         await message.channel.send(
             cleverbot.cleverbot_message(message, message.guild.get_member(client.user.id).display_name))
+    
 
 
-client.run(clientKey)
+client.run('NzgzODU2NTA1MTcwNTU5MDA2.X8g1Qg.QtpAiQ3Aqu3eU6Z7MxaDHDjHI_o')
