@@ -1,5 +1,5 @@
 import discord
-from PIL import Image, ImageChops, ImageColor
+from PIL import Image, ImageChops, ImageColor, ImageFont, ImageDraw
 import numpy as np
 import random
 import time
@@ -284,3 +284,79 @@ async def flag_guesser(message, client, difficulty=0):
         await message.channel.send("Good job " + msg.author.mention + "! The " + type_f[difficulty] + " was " + current_flag['name'])
     except TypeError:
         await message.channel.send("Good job " + msg.author.mention + "! The " + type_f[difficulty] + " was " + current_flag['name'][0])
+
+
+class shuckMan():
+
+    class img():
+        '''Used for drawing text on images relating to the ShuckMan game'''
+
+        inp_shell = requests.get("https://i.imgur.com/bbhRsZ4.png")
+        inp_limb1 = requests.get("https://i.imgur.com/MwaEp9Y.png")
+        inp_limb2 = requests.get("https://i.imgur.com/WwbPhmL.png")
+        inp_limb3 = requests.get("https://i.imgur.com/U9pBmxL.png")
+        inp_limb4 = requests.get("https://i.imgur.com/Wa4uDJH.png")
+        inp_shuckPole = requests.get("https://i.imgur.com/OfPaN9Z.png")
+        inp_shuckNoose = requests.get("https://i.imgur.com/QNisicJ.png")
+        inp_shuckDead  = requests.get("https://i.imgur.com/vsQ4fM6.png")
+
+        Roboto_Regular = "modules/Roboto-Regular.ttf"
+
+        def __init__(self, inp_img, link):
+            if link.lower() == "y" or link.lower() == "yes":
+                self.inp_img = Image.open(BytesIO(inp_img.content))
+            elif link.lower() =="n" or link.lower() == "no":
+                self.inp_img = Image.open(inp_img.content)
+            else:
+                print("Please conform to the syntax")
+
+        # ImageDraw.text(xy, text, fill=None, font=None, anchor=None, spacing=4, align='left', 
+        # direction=None, features=None, language=None, stroke_width=0, stroke_fill=None, embedded_color=False)
+        async def tLeft(self, txt, fnt_type, fnt_size):
+            fnt = ImageFont.truetype(font=fnt_type, size= fnt_size)
+            image = ImageDraw.Draw(self.inp_img)
+            image.text((10,10), txt, font=fnt, fill=(0, 0, 0))
+            self.inp_img.save("tLeft.png")
+        
+        async def main_text(self, txt, fnt_type, fnt_size):
+            fnt = ImageFont.truetype(font=fnt_type, size= fnt_size)
+            print(txt)
+            x, y = self.inp_img.size 
+            pos = x/2
+            image = ImageDraw.Draw(self.inp_img)
+            image.text((20,20), txt, font=fnt, fill=(255, 255, 255))
+            self.inp_img.save("mainText.png")
+
+
+    with open(r'C:\users\guitar god\documents\python\shuckbot\shuckbot-dev\modules\words_alpha.txt') as words_file:
+        word_list = words_file.read().splitlines()
+
+    by_length = {}
+    for word in word_list:
+        by_length.setdefault(len(word), []).append(word)
+
+# '.self' in these methods are not to be confused with the '.self' in img(), 
+# except when creating a new instance or calling a method from img()
+    async def word_finder(self, wordlength):
+        '''Finds the length of the word from words_alpha'''
+        global word
+        word = random.choice(self.by_length[wordlength])
+        print(word)
+
+    async def shuckMan(self, message):
+        content = message.clean_content[11:]
+        print(content)
+
+        if content.lower() == "5":
+            shell = self.img(inp_img= self.inp_shell)
+
+            embed = discord.Embed(title="ShuckMan™                                  Easy Difficulty") 
+            embed.type = "rich"
+            embed.colour = discord.Color.gold() 
+
+            await self.word_finder(5) 
+            await shell.tLeft(txt="Game Start!", fnt_type=self.Roboto_regular)
+            await shell.main_text(txt=word, inp_img="tLeft.png") 
+            
+            embed.set_image(url="attachment://mainText.png")
+            await message.channel.send(embed=embed, file=discord.File("mainText.png"))
